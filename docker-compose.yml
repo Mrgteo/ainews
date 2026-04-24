@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8015:8015"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/sentiment_db
+      - REDIS_URL=redis://redis:6379/0
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+    depends_on:
+      - db
+      - redis
+    volumes:
+      - ./backend:/app
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8015 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3015:3015"
+    depends_on:
+      - backend
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_DB=sentiment_db
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+
+  celery:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    command: celery -A app.tasks.celery_app worker --loglevel=info
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/sentiment_db
+      - REDIS_URL=redis://redis:6379/0
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY:-}
+    depends_on:
+      - backend
+      - redis
+      - db
+    volumes:
+      - ./backend:/app
+
+volumes:
+  pgdata:
+  redisdata:
