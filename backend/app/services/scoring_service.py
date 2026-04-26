@@ -20,37 +20,26 @@ class ScoreResult:
 
 class ScoringService:
     """
-    统一评分体系 (v1.2 - A股市场导向优化)
+    统一评分体系 (v1.5 - 简化版)
 
     评分维度及权重:
-    - a_share_relevance: A股关联度 0.30  (核心维度，替代原来的 importance)
-    - sentiment: 利好利空方向 0.25        (新增，反映对市场的影响方向)
-    - incremental: 增量 0.15            (降低权重，避免过度追捧"新"消息)
-    - scope: 影响范围 0.15               (维持)
-    - source_confidence: 来源可信度 0.10 (维持)
-    - market_reaction: 行情反应 0.05     (维持)
+    - a_share_relevance: A股关联度 0.40  (核心维度，权重最高)
+    - sentiment: 利好利空方向 0.35        (强利好/利空都高分区)
+    - incremental: 增量 0.25             (新信息的程度)
+
+    简化说明（v1.5）:
+    - 移除 scope（影响范围）：个股业绩也很重要，不应因影响范围小而低分
+    - 移除 source_confidence（来源可信度）：同花顺来源质量一致，无需区分
+    - 移除 market_reaction（行情反应）：盘前消息无行情反应
 
     权重总和 = 1.0
     """
 
-    # 新的权重配置
+    # 简化后的权重配置
     WEIGHTS = {
-        "a_share_relevance": 0.30,
-        "sentiment": 0.25,
-        "incremental": 0.15,
-        "scope": 0.15,
-        "source_confidence": 0.10,
-        "market_reaction": 0.05,
-    }
-
-    # 兼容旧版权重配置（用于 scorer.py 回调）
-    LEGACY_WEIGHTS = {
-        "importance": 0.25,
+        "a_share_relevance": 0.40,
+        "sentiment": 0.35,
         "incremental": 0.25,
-        "expectation": 0.20,
-        "scope": 0.15,
-        "source_confidence": 0.10,
-        "market_reaction": 0.05,
     }
 
     # 分级阈值
@@ -85,19 +74,17 @@ class ScoringService:
         a_share_impact_adjustment: float = 0.0,
     ) -> ScoreResult:
         """
-        计算最终评分 (v1.2)
+        计算最终评分 (v1.5 - 简化版)
 
         Args:
-            importance_score: 重要性评分 (0-100)，现在作为A股关联度的基础
+            importance_score: A股关联度评分 (0-100)
             incremental_score: 增量评分 (0-100)
-            expectation_score: 预期差评分 (0-100)，向后兼容
-            scope_score: 影响范围评分 (0-100)
-            source_confidence_score: 来源可信度评分 (0-100)
-            market_reaction_score: 行情反应评分 (0-100)
-            sentiment_score: 利好利空评分 (0-100, 50为中性，>60利好，<40利空)
+            sentiment_score: 利好利空评分 (0-100, 50为中性)
             is_important: 是否为同花顺红字重要消息
-            need_counter_case_review: 是否需要反例检查
             a_share_impact_adjustment: A股影响力调整分 (-40~+10)
+
+        注意：scope_score, source_confidence_score, market_reaction_score 被忽略
+              expectation_score 仅用于向后兼容
 
         Returns:
             ScoreResult
@@ -112,9 +99,6 @@ class ScoringService:
             "a_share_relevance": max(0, min(100, importance_score)),
             "sentiment": sentiment_impact,  # 使用偏离度，而非原始值
             "incremental": max(0, min(100, incremental_score)),
-            "scope": max(0, min(100, scope_score)),
-            "source_confidence": max(0, min(100, source_confidence_score)),
-            "market_reaction": max(0, min(100, market_reaction_score)),
         }
 
         # 加权求和
