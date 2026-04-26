@@ -1,5 +1,5 @@
 """
-评分服务 - 统一评分体系
+评分服务 - 统一评分体系 (v1.2 - A股市场导向优化)
 所有子项统一 0-100 分制，加权合成最终分
 """
 from typing import Dict, Any, Optional
@@ -20,27 +20,34 @@ class ScoreResult:
 
 class ScoringService:
     """
-    统一评分体系
+    统一评分体系 (v1.2 - A股市场导向优化)
 
-    评分维度及权重（v1.2 - A股市场导向优化）:
-    - a_share_relevance: A股关联度 0.30  (新增核心维度)
-    - sentiment: 利好利空方向 0.25       (提升权重)
-    - incremental: 增量 0.15            (降低权重)
+    评分维度及权重:
+    - a_share_relevance: A股关联度 0.30  (核心维度，替代原来的 importance)
+    - sentiment: 利好利空方向 0.25        (新增，反映对市场的影响方向)
+    - incremental: 增量 0.15            (降低权重，避免过度追捧"新"消息)
     - scope: 影响范围 0.15               (维持)
     - source_confidence: 来源可信度 0.10 (维持)
     - market_reaction: 行情反应 0.05     (维持)
 
-    优化说明：
-    1. 将 importance 改为 a_share_relevance，更强调与A股的直接关联
-    2. 提升 sentiment 权重，因为利好/利空方向直接影响市场定价
-    3. 降低 incremental 权重，避免过度追捧"新"但无实质影响的消息
-    4. 保留原有的 source_confidence 和 market_reaction
+    权重总和 = 1.0
     """
 
+    # 新的权重配置
     WEIGHTS = {
         "a_share_relevance": 0.30,
         "sentiment": 0.25,
         "incremental": 0.15,
+        "scope": 0.15,
+        "source_confidence": 0.10,
+        "market_reaction": 0.05,
+    }
+
+    # 兼容旧版权重配置（用于 scorer.py 回调）
+    LEGACY_WEIGHTS = {
+        "importance": 0.25,
+        "incremental": 0.25,
+        "expectation": 0.20,
         "scope": 0.15,
         "source_confidence": 0.10,
         "market_reaction": 0.05,
@@ -68,24 +75,26 @@ class ScoringService:
         self,
         importance_score: float,
         incremental_score: float,
-        expectation_score: float,
-        scope_score: float,
-        source_confidence_score: float,
-        market_reaction_score: float,
+        expectation_score: float = 50.0,
+        scope_score: float = 50.0,
+        source_confidence_score: float = 50.0,
+        market_reaction_score: float = 50.0,
+        sentiment_score: float = 50.0,
         need_counter_case_review: bool = False,
         is_important: bool = False,
         a_share_impact_adjustment: float = 0.0,
     ) -> ScoreResult:
         """
-        计算最终评分
+        计算最终评分 (v1.2)
 
         Args:
-            importance_score: 重要性评分 (0-100)
+            importance_score: 重要性评分 (0-100)，现在作为A股关联度的基础
             incremental_score: 增量评分 (0-100)
-            expectation_score: 预期差评分 (0-100)
+            expectation_score: 预期差评分 (0-100)，向后兼容
             scope_score: 影响范围评分 (0-100)
             source_confidence_score: 来源可信度评分 (0-100)
             market_reaction_score: 行情反应评分 (0-100)
+            sentiment_score: 利好利空评分 (0-100, 50为中性，>60利好，<40利空)
             is_important: 是否为同花顺红字重要消息
             need_counter_case_review: 是否需要反例检查
             a_share_impact_adjustment: A股影响力调整分 (-40~+10)
@@ -93,11 +102,16 @@ class ScoringService:
         Returns:
             ScoreResult
         """
+        # 核心逻辑：sentiment_score 偏离 50 中性的程度决定重要性
+        # sentiment_score=100（极强利好）或 sentiment_score=0（极强利空）都贡献高分
+        # sentiment_score=50（中性）贡献0分
+        sentiment_impact = abs(sentiment_score - 50) / 50 * 100  # 范围 0-100
+
         # 确保所有分数在 0-100 范围内
         scores = {
-            "importance": max(0, min(100, importance_score)),
+            "a_share_relevance": max(0, min(100, importance_score)),
+            "sentiment": sentiment_impact,  # 使用偏离度，而非原始值
             "incremental": max(0, min(100, incremental_score)),
-            "expectation": max(0, min(100, expectation_score)),
             "scope": max(0, min(100, scope_score)),
             "source_confidence": max(0, min(100, source_confidence_score)),
             "market_reaction": max(0, min(100, market_reaction_score)),
@@ -115,10 +129,13 @@ class ScoringService:
             else:
                 boost = 12
             final_score = min(100, final_score + boost)
-            scores["importance"] = min(100, scores["importance"] + boost)
+            scores["a_share_relevance"] = min(100, scores["a_share_relevance"] + boost)
 
         # 加上A股影响调整分
         final_score = final_score + a_share_impact_adjustment
+
+        # 确保最终分数在 0-100 范围内
+        final_score = max(0, min(100, final_score))
 
         # 确定级别
         level = self._determine_level(final_score)
@@ -189,7 +206,7 @@ class ScoringService:
         if final_score >= self.REVIEW_TRIGGERS["final_score"]:
             triggers.append(f"最终分 {final_score:.1f} ≥ {self.REVIEW_TRIGGERS['final_score']}，需要人工确认")
 
-        if scores["source_confidence"] < self.REVIEW_TRIGGERS["source_confidence"]:
+        if scores.get("source_confidence", 100) < self.REVIEW_TRIGGERS["source_confidence"]:
             triggers.append(f"来源可信度 {scores['source_confidence']:.1f} < {self.REVIEW_TRIGGERS['source_confidence']}")
 
         if confidence < self.REVIEW_TRIGGERS["confidence"]:
