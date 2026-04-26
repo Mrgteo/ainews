@@ -235,6 +235,9 @@ class NewsAnalyzerV2:
             a_share_adjustment = impact_result["adjustment"]
 
             # 使用评分服务计算最终分数
+            # 从 impact 结果中获取 sentiment_score
+            sentiment_score = impact.get("sentiment_score", 50)
+
             score_result = self.scoring_service.score(
                 importance_score=incremental.get("importance_score", 50),
                 incremental_score=incremental.get("incremental_score", 50),
@@ -242,6 +245,7 @@ class NewsAnalyzerV2:
                 scope_score=incremental.get("scope_score", 50),
                 source_confidence_score=50,  # 来源可信度
                 market_reaction_score=50,  # 行情反应
+                sentiment_score=sentiment_score,  # 利好利空评分
                 is_important=is_important,
                 a_share_impact_adjustment=a_share_adjustment,
             )

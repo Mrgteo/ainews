@@ -25,8 +25,8 @@
   },
   "correct_analysis": {
     "importance_score": 22,
-    "sentiment": "neutral",
-    "sentiment_score": 0
+    "sentiment_score": 0,
+    "sentiment": "neutral"
   },
   "error_reason": "美国国内政治事件，无任何路径传导到A股。特朗普不是A股上市公司，事件不影响美国对华政策，不影响外资流向，不影响任何可投资板块。",
   "avoid_rules": [
@@ -34,6 +34,8 @@
     "新闻震撼性≠市场影响力",
     "除非明确影响中美关系/外资/可投资资产，否则低分"
   ],
+  "event_type": "中性",
+  "impact_level": "C",
   "transmission_path": "none"
 }
 ```
@@ -46,6 +48,7 @@
   "news_content": "最新民调显示，德国选择党支持率升至XX%，创历史新高...",
   "correct_analysis": {
     "importance_score": 15,
+    "sentiment_score": 0,
     "sentiment": "neutral"
   },
   "error_reason": "欧洲政党支持率变化对A股无任何直接传导路径。",
@@ -53,6 +56,8 @@
     "外国政党/选举新闻对A股无意义",
     "除非影响中欧贸易/制裁政策，否则低分"
   ],
+  "event_type": "中性",
+  "impact_level": "C",
   "transmission_path": "none"
 }
 ```
@@ -65,6 +70,7 @@
   "news_content": "美国司法部宣布停止对美联储的调查，市场分析认为这为沃什出任美联储主席铺平道路...",
   "correct_analysis": {
     "importance_score": 28,
+    "sentiment_score": 0,
     "sentiment": "neutral"
   },
   "error_reason": "美联储人事变动主要影响美国利率预期，对A股的传导路径过于间接（仅通过汇率和外资情绪）。",
@@ -72,7 +78,9 @@
     "外国央行人事变动≠A股直接影响",
     "除非明确影响美联储货币政策，否则低分"
   ],
-  "transmission_path": "D（风险偏好）- 传导较弱
+  "event_type": "中性",
+  "impact_level": "C",
+  "transmission_path": "D（风险偏好）- 传导较弱"
 }
 ```
 
@@ -84,12 +92,15 @@
   "news_content": "在美军对某地区采取军事行动后，XX国总统首次访问委内瑞拉...",
   "correct_analysis": {
     "importance_score": 18,
+    "sentiment_score": 0,
     "sentiment": "neutral"
   },
   "error_reason": "外国与委内瑞拉的外交活动与中国A股无关联。",
   "avoid_rules": [
     "南美/拉美地区外交事件对中国A股无传导路径"
   ],
+  "event_type": "中性",
+  "impact_level": "C",
   "transmission_path": "none"
 }
 ```
@@ -102,6 +113,7 @@
   "news_content": "据英国媒体报道，美国正在考虑暂停西班牙的北约成员国资格...",
   "correct_analysis": {
     "importance_score": 20,
+    "sentiment_score": 0,
     "sentiment": "neutral"
   },
   "error_reason": "北约成员资格问题是西方内部事务，对中国A股无任何传导路径。",
@@ -109,6 +121,8 @@
     "北约/欧盟内部事务≠A股关注点",
     "除非影响中欧关系或中欧贸易，否则低分"
   ],
+  "event_type": "中性",
+  "impact_level": "C",
   "transmission_path": "none"
 }
 ```
@@ -121,12 +135,15 @@
   "news_content": "以色列军方要求黎巴嫩南部多个地区的居民撤离...",
   "correct_analysis": {
     "importance_score": 25,
+    "sentiment_score": 0,
     "sentiment": "neutral"
   },
   "error_reason": "中东地区冲突对中国A股无直接传导路径。",
   "avoid_rules": [
     "中东地缘冲突≠A股重要新闻（除非影响油价）"
   ],
+  "event_type": "中性",
+  "impact_level": "C",
   "transmission_path": "C（油价）- 但影响不稳定，默认低分"
 }
 ```
@@ -139,12 +156,15 @@
   "news_content": "以色列总理内塔尼亚胡表示，以方在黎巴嫩有应对威胁的完全行动自由...",
   "correct_analysis": {
     "importance_score": 20,
+    "sentiment_score": 0,
     "sentiment": "neutral"
   },
   "error_reason": "以色列政策声明对中国A股无直接传导路径。",
   "avoid_rules": [
     "外国政府政策表态≠A股重要新闻"
   ],
+  "event_type": "中性",
+  "impact_level": "C",
   "transmission_path": "none"
 }
 ```
@@ -159,30 +179,15 @@
   "news_content": "某知名歌星演唱会门票开售即售罄，引发粉丝热议...",
   "correct_analysis": {
     "importance_score": 8,
+    "sentiment_score": 0,
     "sentiment": "neutral"
   },
   "error_reason": "娱乐新闻与A股市场完全无关。",
   "avoid_rules": [
     "娱乐/文化事件≠A股关注点"
   ],
-  "transmission_path": "none"
-}
-```
-
-```json
-{
-  "case_type": "counter_example",
-  "error_type": "overestimated",
-  "news_title": "某地发生3.5级地震",
-  "news_content": "XX省XX市发生3.5级地震，暂无人员伤亡报告...",
-  "correct_analysis": {
-    "importance_score": 10,
-    "sentiment": "neutral"
-  },
-  "error_reason": "小型地震无重大经济损失，对A股无影响。",
-  "avoid_rules": [
-    "无重大经济损失的自然灾害≠A股重要新闻"
-  ],
+  "event_type": "中性",
+  "impact_level": "C",
   "transmission_path": "none"
 }
 ```
@@ -191,9 +196,7 @@
 
 ## 正例库（Positive Examples）— 识别真正的利好/利空
 
-这些是**应该被正确识别为高重要性**的新闻。
-
-### 类型一：A股上市公司业绩
+### 类型一：个股业绩暴增（S级利好）
 
 ```json
 {
@@ -201,13 +204,25 @@
   "news_title": "派瑞股份：一季度净利润1558.81万元，同比增长2218.85%",
   "news_content": "派瑞股份发布一季报，净利润1558.81万元，同比增长2218.85%...",
   "analysis": {
-    "importance_score": 82,
+    "importance_score": 88,
     "importance_level": "high",
+    "sentiment_score": 92,
     "sentiment": "bullish",
-    "sentiment_score": 88,
+    "event_type": "个股强利好",
+    "impact_level": "S",
     "transmission_path": "B（主体直连）"
   },
-  "reasoning": "直接涉及A股上市公司净利润增长22倍，属于重大业绩变动，对该股及同行业板块有直接利好影响。业绩超预期会吸引资金关注，带动行业估值提升。"
+  "reasoning": "直接涉及A股上市公司净利润增长22倍，属于S级业绩暴增。净利润增长超2000%是极强利好，对该股及同行业板块有直接利好影响。业绩超预期会吸引资金关注，带动行业估值提升。",
+  "impact_objects": [
+    {
+      "object_type": "stock",
+      "object_name": "派瑞股份",
+      "direction": "bullish",
+      "confidence": 0.95,
+      "impact_duration": "medium_term"
+    }
+  ],
+  "key_evidence": ["净利润同比增长2218.85%", "一季度业绩爆发", "直接利好股价"]
 }
 ```
 
@@ -219,15 +234,31 @@
   "analysis": {
     "importance_score": 85,
     "importance_level": "high",
+    "sentiment_score": 78,
     "sentiment": "bullish",
-    "sentiment_score": 80,
+    "event_type": "个股强利好",
+    "impact_level": "A",
     "transmission_path": "B（主体直连）"
   },
-  "reasoning": "行业龙头业绩增长直接带动板块情绪，同时影响新能源产业链上下游估值。"
+  "reasoning": "行业龙头业绩增长直接带动板块情绪，同时影响新能源产业链上下游估值。",
+  "impact_objects": [
+    {
+      "object_type": "stock",
+      "object_name": "宁德时代",
+      "direction": "bullish",
+      "confidence": 0.9
+    },
+    {
+      "object_type": "sector",
+      "object_name": "新能源产业链",
+      "direction": "bullish",
+      "confidence": 0.75
+    }
+  ]
 }
 ```
 
-### 类型二：股权收购/并购重组
+### 类型二：股权收购/并购重组（S级利好）
 
 ```json
 {
@@ -235,17 +266,93 @@
   "news_title": "中赋科技：拟收购CRO公司军科正源控制权 整体估值10亿元",
   "news_content": "中赋科技公告，拟收购CRO公司军科正源控制权，整体估值10亿元...",
   "analysis": {
-    "importance_score": 78,
+    "importance_score": 85,
     "importance_level": "high",
+    "sentiment_score": 85,
     "sentiment": "bullish",
-    "sentiment_score": 75,
+    "event_type": "个股强利好",
+    "impact_level": "S",
     "transmission_path": "B（主体直连）"
   },
-  "reasoning": "上市公司股权收购直接利好股价，同时彰显公司扩张战略，提升想象空间。"
+  "reasoning": "上市公司股权收购直接利好股价，10亿估值属于重大交易。股权收购彰显公司扩张战略，提升想象空间，可能引发市场重估。",
+  "impact_objects": [
+    {
+      "object_type": "stock",
+      "object_name": "中赋科技",
+      "direction": "bullish",
+      "confidence": 0.9
+    },
+    {
+      "object_type": "sector",
+      "object_name": "CRO/医药外包",
+      "direction": "bullish",
+      "confidence": 0.7
+    }
+  ]
 }
 ```
 
-### 类型三：政策直接利好
+```json
+{
+  "case_type": "positive_example",
+  "news_title": "某公司：筹划重大资产重组 标的涉及AI算力赛道",
+  "news_content": "某A股上市公司发布公告，正在筹划重大资产重组，标的资产涉及AI算力领域...",
+  "analysis": {
+    "importance_score": 90,
+    "importance_level": "high",
+    "sentiment_score": 92,
+    "sentiment": "bullish",
+    "event_type": "个股强利好",
+    "impact_level": "S",
+    "transmission_path": "B（主体直连）"
+  },
+  "reasoning": "重大资产重组+热门赛道（AI算力）是S级利好组合。传统业务公司重组进入热门方向是最高强度情形，可能引发复牌后连续涨停。",
+  "impact_objects": [
+    {
+      "object_type": "stock",
+      "object_name": "该公司",
+      "direction": "bullish",
+      "confidence": 0.95
+    },
+    {
+      "object_type": "sector",
+      "object_name": "AI算力",
+      "direction": "bullish",
+      "confidence": 0.8
+    }
+  ]
+}
+```
+
+### 类型三：控制权变更（S级利好）
+
+```json
+{
+  "case_type": "positive_example",
+  "news_title": "某公司：控股股东拟变更为国有资本运营公司",
+  "news_content": "某A股上市公司公告，控股股东正在筹划协议转让股份，可能导致公司控制权变更为国有资本运营公司...",
+  "analysis": {
+    "importance_score": 88,
+    "importance_level": "high",
+    "sentiment_score": 90,
+    "sentiment": "bullish",
+    "event_type": "个股强利好",
+    "impact_level": "S",
+    "transmission_path": "B（主体直连）"
+  },
+  "reasoning": "国资入主是S级利好类型。市场会重新预期公司未来资源、资产注入、业务转型和治理改善。国资背景通常意味着更强的资源整合能力。",
+  "impact_objects": [
+    {
+      "object_type": "stock",
+      "object_name": "该公司",
+      "direction": "bullish",
+      "confidence": 0.95
+    }
+  ]
+}
+```
+
+### 类型四：政策直接利好
 
 ```json
 {
@@ -255,11 +362,27 @@
   "analysis": {
     "importance_score": 88,
     "importance_level": "high",
-    "sentiment": "bullish",
     "sentiment_score": 72,
+    "sentiment": "bullish",
+    "event_type": "板块利好",
+    "impact_level": "A",
     "transmission_path": "A（直接政策）"
   },
-  "reasoning": "证监会直接政策，明确利好创投板块和券商板块。"
+  "reasoning": "证监会直接政策，明确利好创投板块和券商板块。",
+  "impact_objects": [
+    {
+      "object_type": "sector",
+      "object_name": "创投板块",
+      "direction": "bullish",
+      "confidence": 0.85
+    },
+    {
+      "object_type": "sector",
+      "object_name": "券商",
+      "direction": "bullish",
+      "confidence": 0.75
+    }
+  ]
 }
 ```
 
@@ -271,15 +394,25 @@
   "analysis": {
     "importance_score": 92,
     "importance_level": "high",
-    "sentiment": "bullish",
     "sentiment_score": 85,
+    "sentiment": "bullish",
+    "event_type": "板块利好",
+    "impact_level": "S",
     "transmission_path": "A（直接政策）"
   },
-  "reasoning": "央行直接放水政策，释放流动性，直接利好股市资金面。"
+  "reasoning": "央行直接放水政策，释放流动性，直接利好股市资金面。",
+  "impact_objects": [
+    {
+      "object_type": "sector",
+      "object_name": "整体市场",
+      "direction": "bullish",
+      "confidence": 0.9
+    }
+  ]
 }
 ```
 
-### 类型四：行业政策
+### 类型五：行业政策
 
 ```json
 {
@@ -289,11 +422,55 @@
   "analysis": {
     "importance_score": 72,
     "importance_level": "high",
-    "sentiment": "bullish",
     "sentiment_score": 70,
+    "sentiment": "bullish",
+    "event_type": "板块利好",
+    "impact_level": "A",
     "transmission_path": "A（直接政策）"
   },
-  "reasoning": "部委级政策直接扶持目标行业，利好充电桩板块和新能源汽车板块。"
+  "reasoning": "部委级政策直接扶持目标行业，利好充电桩板块和新能源汽车板块。",
+  "impact_objects": [
+    {
+      "object_type": "sector",
+      "object_name": "充电桩",
+      "direction": "bullish",
+      "confidence": 0.85
+    },
+    {
+      "object_type": "sector",
+      "object_name": "新能源汽车",
+      "direction": "bullish",
+      "confidence": 0.75
+    }
+  ]
+}
+```
+
+### 类型六：摘帽/撤销风险警示（S级利好）
+
+```json
+{
+  "case_type": "positive_example",
+  "news_title": "*ST星农：申请撤销股票退市风险警示",
+  "news_content": "*ST星农发布公告，已向交易所申请撤销退市风险警示...",
+  "analysis": {
+    "importance_score": 85,
+    "importance_level": "high",
+    "sentiment_score": 88,
+    "sentiment": "bullish",
+    "event_type": "个股强利好",
+    "impact_level": "S",
+    "transmission_path": "B（主体直连）"
+  },
+  "reasoning": "摘帽是S级利好类型。交易限制解除，资金准入改善，市场风险偏好修复。摘帽叠加热门题材可能引发连续涨停。",
+  "impact_objects": [
+    {
+      "object_type": "stock",
+      "object_name": "*ST星农",
+      "direction": "bullish",
+      "confidence": 0.95
+    }
+  ]
 }
 ```
 
@@ -301,21 +478,45 @@
 
 ## 正例库（Negative Examples）— 识别真正的利空
 
+### 类型一：被ST/退市风险（S级利空）
+
 ```json
 {
   "case_type": "negative_example",
-  "news_title": "XX上市公司被证监会立案调查",
-  "news_content": "XX公司发布公告，称收到证监会立案调查通知书...",
+  "news_title": "XX公司：实施退市风险警示 股票简称变更为*ST",
+  "news_content": "XX公司发布公告，因触及财务类退市指标，公司股票将于明日复牌并实施退市风险警示...",
   "analysis": {
-    "importance_score": 80,
+    "importance_score": 90,
     "importance_level": "high",
+    "sentiment_score": -92,
     "sentiment": "bearish",
-    "sentiment_score": -85,
+    "event_type": "个股强利空",
+    "impact_level": "S",
     "transmission_path": "B（主体直连）"
   },
-  "reasoning": "监管立案调查是重大利空，可能导致股价暴跌和行业拖累。"
+  "reasoning": "实施退市风险警示是S级利空。可能引发连续跌停，资金被迫回避。"
 }
 ```
+
+```json
+{
+  "case_type": "negative_example",
+  "news_title": "XX公司：可能被终止上市 收到终止上市事先告知书",
+  "news_content": "XX公司公告，收到交易所终止上市事先告知书...",
+  "analysis": {
+    "importance_score": 95,
+    "importance_level": "high",
+    "sentiment_score": -95,
+    "sentiment": "bearish",
+    "event_type": "个股强利空",
+    "impact_level": "S",
+    "transmission_path": "B（主体直连）"
+  },
+  "reasoning": "终止上市风险是最高级别利空。可能导致连续跌停甚至退市。"
+}
+```
+
+### 类型二：业绩暴雷
 
 ```json
 {
@@ -325,8 +526,10 @@
   "analysis": {
     "importance_score": 75,
     "importance_level": "high",
-    "sentiment": "bearish",
     "sentiment_score": -78,
+    "sentiment": "bearish",
+    "event_type": "个股强利空",
+    "impact_level": "A",
     "transmission_path": "B（主体直连）"
   },
   "reasoning": "业绩大幅下滑直接利空股价，同时可能拖累行业预期。"
@@ -341,7 +544,8 @@
 2. **正反搭配**：同时展示正例和反例
 3. **解释原因**：每个案例都要有明确的判断理由
 4. **传导路径**：明确标注每条新闻的传导路径
-5. **可扩展**：根据实际误报持续补充新案例
+5. **强度分级**：标注S/A/B/C级别
+6. **可扩展**：根据实际误报持续补充新案例
 
 ---
 
@@ -354,13 +558,18 @@
 
 案例1 (反例 - 应主动降权)：
 标题：白宫记者晚宴传出枪声 特朗普被紧急疏散
-分析：importance_score=22, sentiment=neutral
+分析：importance_score=22, sentiment=neutral, sentiment_score=0
 降权原因：美国国内政治事件，无任何A股传导路径
 
 案例2 (正例 - 应给高分)：
 标题：派瑞股份：一季度净利润1558.81万元，同比增长2218.85%
-分析：importance_score=82, sentiment=bullish
-高分原因：直接涉及A股上市公司业绩超预期
+分析：importance_score=88, sentiment=bullish, sentiment_score=92, impact_level=S
+高分原因：S级业绩暴增，直接涉及A股上市公司净利润增长22倍
+
+案例3 (正例 - 应给高分)：
+标题：中赋科技：拟收购CRO公司军科正源控制权 整体估值10亿元
+分析：importance_score=85, sentiment=bullish, sentiment_score=85, impact_level=S
+高分原因：S级并购重组，10亿估值属于重大交易，直接利好股价
 
 现在分析以下新闻：
 标题：{current_title}
