@@ -22,19 +22,25 @@ class ScoringService:
     """
     统一评分体系
 
-    评分维度及权重:
-    - importance: 重要性 0.25
-    - incremental: 增量 0.25
-    - expectation: 预期差 0.20
-    - scope: 影响范围 0.15
-    - source_confidence: 来源可信度 0.10
-    - market_reaction: 行情反应 0.05
+    评分维度及权重（v1.2 - A股市场导向优化）:
+    - a_share_relevance: A股关联度 0.30  (新增核心维度)
+    - sentiment: 利好利空方向 0.25       (提升权重)
+    - incremental: 增量 0.15            (降低权重)
+    - scope: 影响范围 0.15               (维持)
+    - source_confidence: 来源可信度 0.10 (维持)
+    - market_reaction: 行情反应 0.05     (维持)
+
+    优化说明：
+    1. 将 importance 改为 a_share_relevance，更强调与A股的直接关联
+    2. 提升 sentiment 权重，因为利好/利空方向直接影响市场定价
+    3. 降低 incremental 权重，避免过度追捧"新"但无实质影响的消息
+    4. 保留原有的 source_confidence 和 market_reaction
     """
 
     WEIGHTS = {
-        "importance": 0.25,
-        "incremental": 0.25,
-        "expectation": 0.20,
+        "a_share_relevance": 0.30,
+        "sentiment": 0.25,
+        "incremental": 0.15,
         "scope": 0.15,
         "source_confidence": 0.10,
         "market_reaction": 0.05,

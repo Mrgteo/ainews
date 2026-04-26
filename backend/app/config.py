@@ -30,11 +30,13 @@ class Settings(BaseSettings):
     REQUEST_DELAY_MAX: int = 8
     MAX_RETRIES: int = 3
 
-    # 评分权重配置
-    WEIGHT_IMPORTANCE: float = 0.4
-    WEIGHT_INCREMENTAL: float = 0.3
-    WEIGHT_EXPECTATION: float = 0.2
-    WEIGHT_SENSITIVITY: float = 0.1
+    # 评分权重配置 (v1.2 - A股市场导向优化)
+    WEIGHT_A_SHARE_RELEVANCE: float = 0.30  # A股关联度
+    WEIGHT_SENTIMENT: float = 0.25  # 利好利空方向
+    WEIGHT_INCREMENTAL: float = 0.15  # 增量
+    WEIGHT_SCOPE: float = 0.15  # 影响范围
+    WEIGHT_SOURCE_CONFIDENCE: float = 0.10  # 来源可信度
+    WEIGHT_MARKET_REACTION: float = 0.05  # 行情反应
 
     class Config:
         env_file = ".env"

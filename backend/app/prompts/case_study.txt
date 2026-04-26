@@ -5,57 +5,345 @@
 
 在分析时，从案例库中选取3-5个相似案例，作为few-shot示例输入给模型。
 
-## 案例格式
+---
 
-### 正例 (Positive Cases)
+## 反例库（Counter Examples）— 避免高估
 
-```json
-{
-  "case_type": "positive",
-  "news_title": "宁德时代发布超预期业绩公告",
-  "news_content": "宁德时代2023年Q4净利润超市场预期20%...",
-  "analysis": {
-    "importance_score": 88,
-    "incremental_level": "high",
-    "new_facts": ["Q4净利润超预期20%", "市场份额提升至50%"],
-    "expectation_type": "exceed",
-    "sentiment": "bullish"
-  },
-  "label_reason": "典型的高重要性+超预期+增量信息案例"
-}
-```
+这些是**被错误高估**的新闻，必须学会识别并主动降权。
 
-### 反例 (Negative Cases) - 避免误判
+### 类型一：国际政治事件（无传导路径）
 
 ```json
 {
-  "case_type": "negative",
+  "case_type": "counter_example",
   "error_type": "overestimated",
-  "news_title": "某自媒体称某政策将出台",
-  "news_content": "据知情人士透露，某政策可能将于近期出台...",
+  "news_title": "白宫记者晚宴传出枪声 特朗普被紧急疏散",
+  "news_content": "华盛顿消息，当地时间XX日，白宫记者晚宴现场传出枪声，特朗普被特勤局紧急疏散...",
   "original_analysis": {
-    "importance_score": 75,
-    "need_manual_review": false
+    "importance_score": 78,
+    "sentiment": "unknown"
   },
   "correct_analysis": {
-    "importance_score": 30,
-    "need_manual_review": true
+    "importance_score": 22,
+    "sentiment": "neutral",
+    "sentiment_score": 0
   },
-  "error_reason": "来源为自媒体未经证实消息，不应高估",
+  "error_reason": "美国国内政治事件，无任何路径传导到A股。特朗普不是A股上市公司，事件不影响美国对华政策，不影响外资流向，不影响任何可投资板块。",
   "avoid_rules": [
-    "自媒体消息默认低可信度",
-    "'可能'、'据知情人士'等措辞表示不确定性高",
-    "未经官方确认的政策消息不应高权重"
-  ]
+    "国际政治事件≠A股重要新闻",
+    "新闻震撼性≠市场影响力",
+    "除非明确影响中美关系/外资/可投资资产，否则低分"
+  ],
+  "transmission_path": "none"
 }
 ```
+
+```json
+{
+  "case_type": "counter_example",
+  "error_type": "overestimated",
+  "news_title": "民调机构：德国选择党支持率创新高",
+  "news_content": "最新民调显示，德国选择党支持率升至XX%，创历史新高...",
+  "correct_analysis": {
+    "importance_score": 15,
+    "sentiment": "neutral"
+  },
+  "error_reason": "欧洲政党支持率变化对A股无任何直接传导路径。",
+  "avoid_rules": [
+    "外国政党/选举新闻对A股无意义",
+    "除非影响中欧贸易/制裁政策，否则低分"
+  ],
+  "transmission_path": "none"
+}
+```
+
+```json
+{
+  "case_type": "counter_example",
+  "error_type": "overestimated",
+  "news_title": "美司法部停止调查美联储或为沃什提名获参议院批准铺路",
+  "news_content": "美国司法部宣布停止对美联储的调查，市场分析认为这为沃什出任美联储主席铺平道路...",
+  "correct_analysis": {
+    "importance_score": 28,
+    "sentiment": "neutral"
+  },
+  "error_reason": "美联储人事变动主要影响美国利率预期，对A股的传导路径过于间接（仅通过汇率和外资情绪）。",
+  "avoid_rules": [
+    "外国央行人事变动≠A股直接影响",
+    "除非明确影响美联储货币政策，否则低分"
+  ],
+  "transmission_path": "D（风险偏好）- 传导较弱
+}
+```
+
+```json
+{
+  "case_type": "counter_example",
+  "error_type": "overestimated",
+  "news_title": "美国动武后外国领导人首次到访委内瑞拉",
+  "news_content": "在美军对某地区采取军事行动后，XX国总统首次访问委内瑞拉...",
+  "correct_analysis": {
+    "importance_score": 18,
+    "sentiment": "neutral"
+  },
+  "error_reason": "外国与委内瑞拉的外交活动与中国A股无关联。",
+  "avoid_rules": [
+    "南美/拉美地区外交事件对中国A股无传导路径"
+  ],
+  "transmission_path": "none"
+}
+```
+
+```json
+{
+  "case_type": "counter_example",
+  "error_type": "overestimated",
+  "news_title": "英媒：美正考虑暂停西班牙北约成员国资格",
+  "news_content": "据英国媒体报道，美国正在考虑暂停西班牙的北约成员国资格...",
+  "correct_analysis": {
+    "importance_score": 20,
+    "sentiment": "neutral"
+  },
+  "error_reason": "北约成员资格问题是西方内部事务，对中国A股无任何传导路径。",
+  "avoid_rules": [
+    "北约/欧盟内部事务≠A股关注点",
+    "除非影响中欧关系或中欧贸易，否则低分"
+  ],
+  "transmission_path": "none"
+}
+```
+
+```json
+{
+  "case_type": "counter_example",
+  "error_type": "overestimated",
+  "news_title": "以军要求黎南部多地居民撤离",
+  "news_content": "以色列军方要求黎巴嫩南部多个地区的居民撤离...",
+  "correct_analysis": {
+    "importance_score": 25,
+    "sentiment": "neutral"
+  },
+  "error_reason": "中东地区冲突对中国A股无直接传导路径。",
+  "avoid_rules": [
+    "中东地缘冲突≠A股重要新闻（除非影响油价）"
+  ],
+  "transmission_path": "C（油价）- 但影响不稳定，默认低分"
+}
+```
+
+```json
+{
+  "case_type": "counter_example",
+  "error_type": "overestimated",
+  "news_title": "内塔尼亚胡：以方在黎巴嫩有应对威胁的"完全行动自由"",
+  "news_content": "以色列总理内塔尼亚胡表示，以方在黎巴嫩有应对威胁的完全行动自由...",
+  "correct_analysis": {
+    "importance_score": 20,
+    "sentiment": "neutral"
+  },
+  "error_reason": "以色列政策声明对中国A股无直接传导路径。",
+  "avoid_rules": [
+    "外国政府政策表态≠A股重要新闻"
+  ],
+  "transmission_path": "none"
+}
+```
+
+### 类型二：社会文化事件（无经济关联）
+
+```json
+{
+  "case_type": "counter_example",
+  "error_type": "overestimated",
+  "news_title": "XX明星演唱会门票秒空",
+  "news_content": "某知名歌星演唱会门票开售即售罄，引发粉丝热议...",
+  "correct_analysis": {
+    "importance_score": 8,
+    "sentiment": "neutral"
+  },
+  "error_reason": "娱乐新闻与A股市场完全无关。",
+  "avoid_rules": [
+    "娱乐/文化事件≠A股关注点"
+  ],
+  "transmission_path": "none"
+}
+```
+
+```json
+{
+  "case_type": "counter_example",
+  "error_type": "overestimated",
+  "news_title": "某地发生3.5级地震",
+  "news_content": "XX省XX市发生3.5级地震，暂无人员伤亡报告...",
+  "correct_analysis": {
+    "importance_score": 10,
+    "sentiment": "neutral"
+  },
+  "error_reason": "小型地震无重大经济损失，对A股无影响。",
+  "avoid_rules": [
+    "无重大经济损失的自然灾害≠A股重要新闻"
+  ],
+  "transmission_path": "none"
+}
+```
+
+---
+
+## 正例库（Positive Examples）— 识别真正的利好/利空
+
+这些是**应该被正确识别为高重要性**的新闻。
+
+### 类型一：A股上市公司业绩
+
+```json
+{
+  "case_type": "positive_example",
+  "news_title": "派瑞股份：一季度净利润1558.81万元，同比增长2218.85%",
+  "news_content": "派瑞股份发布一季报，净利润1558.81万元，同比增长2218.85%...",
+  "analysis": {
+    "importance_score": 82,
+    "importance_level": "high",
+    "sentiment": "bullish",
+    "sentiment_score": 88,
+    "transmission_path": "B（主体直连）"
+  },
+  "reasoning": "直接涉及A股上市公司净利润增长22倍，属于重大业绩变动，对该股及同行业板块有直接利好影响。业绩超预期会吸引资金关注，带动行业估值提升。"
+}
+```
+
+```json
+{
+  "case_type": "positive_example",
+  "news_title": "宁德时代：预计2024年净利润同比增长20%-30%",
+  "news_content": "宁德时代发布业绩预告，预计2024年净利润同比增长20%-30%...",
+  "analysis": {
+    "importance_score": 85,
+    "importance_level": "high",
+    "sentiment": "bullish",
+    "sentiment_score": 80,
+    "transmission_path": "B（主体直连）"
+  },
+  "reasoning": "行业龙头业绩增长直接带动板块情绪，同时影响新能源产业链上下游估值。"
+}
+```
+
+### 类型二：股权收购/并购重组
+
+```json
+{
+  "case_type": "positive_example",
+  "news_title": "中赋科技：拟收购CRO公司军科正源控制权 整体估值10亿元",
+  "news_content": "中赋科技公告，拟收购CRO公司军科正源控制权，整体估值10亿元...",
+  "analysis": {
+    "importance_score": 78,
+    "importance_level": "high",
+    "sentiment": "bullish",
+    "sentiment_score": 75,
+    "transmission_path": "B（主体直连）"
+  },
+  "reasoning": "上市公司股权收购直接利好股价，同时彰显公司扩张战略，提升想象空间。"
+}
+```
+
+### 类型三：政策直接利好
+
+```json
+{
+  "case_type": "positive_example",
+  "news_title": "证监会宣布优化IPO监管政策 支持科技型企业上市",
+  "news_content": "证监会发布新规，对符合条件的科技型企业提供IPO绿色通道...",
+  "analysis": {
+    "importance_score": 88,
+    "importance_level": "high",
+    "sentiment": "bullish",
+    "sentiment_score": 72,
+    "transmission_path": "A（直接政策）"
+  },
+  "reasoning": "证监会直接政策，明确利好创投板块和券商板块。"
+}
+```
+
+```json
+{
+  "case_type": "positive_example",
+  "news_title": "央行宣布降准0.5个百分点 释放长期资金约1万亿",
+  "news_content": "央行宣布，下调金融机构存款准备金率0.5个百分点...",
+  "analysis": {
+    "importance_score": 92,
+    "importance_level": "high",
+    "sentiment": "bullish",
+    "sentiment_score": 85,
+    "transmission_path": "A（直接政策）"
+  },
+  "reasoning": "央行直接放水政策，释放流动性，直接利好股市资金面。"
+}
+```
+
+### 类型四：行业政策
+
+```json
+{
+  "case_type": "positive_example",
+  "news_title": "发改委：加快推动新能源汽车充电基础设施建设",
+  "news_content": "发改委印发通知，要求加快推动新能源汽车充电基础设施建设...",
+  "analysis": {
+    "importance_score": 72,
+    "importance_level": "high",
+    "sentiment": "bullish",
+    "sentiment_score": 70,
+    "transmission_path": "A（直接政策）"
+  },
+  "reasoning": "部委级政策直接扶持目标行业，利好充电桩板块和新能源汽车板块。"
+}
+```
+
+---
+
+## 正例库（Negative Examples）— 识别真正的利空
+
+```json
+{
+  "case_type": "negative_example",
+  "news_title": "XX上市公司被证监会立案调查",
+  "news_content": "XX公司发布公告，称收到证监会立案调查通知书...",
+  "analysis": {
+    "importance_score": 80,
+    "importance_level": "high",
+    "sentiment": "bearish",
+    "sentiment_score": -85,
+    "transmission_path": "B（主体直连）"
+  },
+  "reasoning": "监管立案调查是重大利空，可能导致股价暴跌和行业拖累。"
+}
+```
+
+```json
+{
+  "case_type": "negative_example",
+  "news_title": "XX公司：2024年净利润同比下降80%",
+  "news_content": "XX公司发布业绩快报，2024年净利润同比下降80%...",
+  "analysis": {
+    "importance_score": 75,
+    "importance_level": "high",
+    "sentiment": "bearish",
+    "sentiment_score": -78,
+    "transmission_path": "B（主体直连）"
+  },
+  "reasoning": "业绩大幅下滑直接利空股价，同时可能拖累行业预期。"
+}
+```
+
+---
 
 ## 案例选取原则
 
-1. **相似性优先**：选择与当前新闻最相似的案例
-2. **多样性**：正例和反例搭配
-3. **时效性**：优先选择近期案例
-4. **标注清晰**：确保案例的分析和标注准确
+1. **相似性优先**：选择与当前新闻类型最相似的案例
+2. **正反搭配**：同时展示正例和反例
+3. **解释原因**：每个案例都要有明确的判断理由
+4. **传导路径**：明确标注每条新闻的传导路径
+5. **可扩展**：根据实际误报持续补充新案例
+
+---
 
 ## 使用示例
 
@@ -64,17 +352,15 @@
 ```
 你将看到3个参考案例：
 
-案例1 (正例)：
-标题：xxx
-分析：xxx
+案例1 (反例 - 应主动降权)：
+标题：白宫记者晚宴传出枪声 特朗普被紧急疏散
+分析：importance_score=22, sentiment=neutral
+降权原因：美国国内政治事件，无任何A股传导路径
 
-案例2 (反例)：
-标题：xxx
-分析：xxx - 错误原因：xxx
-
-案例3 (正例)：
-标题：xxx
-分析：xxx
+案例2 (正例 - 应给高分)：
+标题：派瑞股份：一季度净利润1558.81万元，同比增长2218.85%
+分析：importance_score=82, sentiment=bullish
+高分原因：直接涉及A股上市公司业绩超预期
 
 现在分析以下新闻：
 标题：{current_title}
