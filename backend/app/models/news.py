@@ -39,6 +39,9 @@ class NewsArticle(Base):
     final_score = Column(Numeric(5, 2), nullable=True)
     news_type = Column(String(50), nullable=True)
 
+    # 来源标记字段
+    is_important = Column(Boolean, default=False)  # 同花顺红字重要消息
+
     # 状态字段
     is_processed = Column(Boolean, default=False)
     processed_at = Column(DateTime(timezone=True), nullable=True)

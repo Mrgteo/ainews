@@ -107,7 +107,7 @@
     <template #footer>
       <div class="dialog-footer">
         <el-button @click="visible = false">关闭</el-button>
-        <el-button type="primary" @click="handleReanalyze">
+        <el-button type="primary" @click="handleReanalyze" :disabled="!news">
           重新分析
         </el-button>
       </div>
@@ -117,7 +117,7 @@
 
 <script setup lang="ts">
 import { ref, watch, computed } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElMessageBox } from 'element-plus'
 import { Link, Edit } from '@element-plus/icons-vue'
 import type { NewsArticle } from '../api/news'
 import { updateNewsType, analyzeNews } from '../api/news'
@@ -178,31 +178,84 @@ const handleOpenUrl = () => {
   }
 }
 
-const handleChangeType = async () => {
+const handleChangeType = () => {
   if (!props.news) return
 
-  const types = ['紧急', '重点关注', '一般参考', '已处理噪音']
-  const currentIndex = types.indexOf(props.news.news_type || '')
-  const nextType = types[(currentIndex + 1) % types.length]
+  const types = [
+    { label: '紧急', value: '紧急', type: 'danger' },
+    { label: '重点关注', value: '重点关注', type: 'warning' },
+    { label: '一般参考', value: '一般参考', type: 'primary' },
+    { label: '已处理噪音', value: '已处理噪音', type: 'info' },
+  ]
+  const currentType = props.news.news_type || ''
 
-  try {
-    await updateNewsType(props.news.id, { news_type: nextType })
-    ElMessage.success(`已修改分类为: ${nextType}`)
-    emit('update')
-  } catch (error) {
-    ElMessage.error('修改失败')
+  // 创建选项按钮的HTML
+  const optionsHtml = `
+    <div style="display: flex; flex-direction: column; gap: 10px; padding: 10px 0;">
+      <div style="color: #606266; margin-bottom: 5px;">当前分类: ${currentType || '未分类'}</div>
+      ${types.map(t => `
+        <button
+          id="type-option-${t.value}"
+          style="
+            width: 100%;
+            padding: 10px 15px;
+            border: 1px solid ${currentType === t.value ? '#409eff' : '#dcdfe6'};
+            background: ${currentType === t.value ? '#ecf5ff' : '#fff'};
+            color: ${currentType === t.value ? '#409eff' : '#303133'};
+            border-radius: 4px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 14px;
+            ${currentType === t.value ? 'font-weight: 600;' : ''}
+          "
+          onclick="window.__selectType && window.__selectType('${t.value}')"
+        >
+          ${t.label}${currentType === t.value ? ' (当前)' : ''}
+        </button>
+      `).join('')}
+    </div>
+  `
+
+  ElMessageBox({
+    title: '修改分类',
+    message: optionsHtml,
+    dangerouslyUseHTMLString: true,
+    showConfirmButton: false,
+    showCancelButton: true,
+    cancelButtonText: '关闭',
+    closeOnClickModal: true,
+    closeOnPressEscape: true,
+  })
+
+  // 设置选择回调
+  window.__selectType = async (selectedType: string) => {
+    ElMessageBox.close()
+    if (selectedType && selectedType !== currentType) {
+      try {
+        await updateNewsType(props.news!.id, { news_type: selectedType })
+        ElMessage.success(`已修改分类为: ${selectedType}`)
+        emit('update')
+      } catch {
+        ElMessage.error('修改失败')
+      }
+    }
   }
 }
 
 const handleReanalyze = async () => {
-  if (!props.news) return
+  if (!props.news) {
+    ElMessage.warning('没有选中的新闻')
+    return
+  }
 
   try {
+    ElMessage.info('开始分析...')
     await analyzeNews(props.news.id)
-    ElMessage.success('重新分析任务已启动')
+    ElMessage.success('分析完成')
     emit('update')
   } catch (error) {
-    ElMessage.error('启动分析失败')
+    ElMessage.error('分析失败')
+    console.error(error)
   }
 }
 </script>

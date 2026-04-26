@@ -32,9 +32,19 @@ class ScoreCalculator:
         is_incremental: bool,
         expectation_diff: str,
         category: str,
+        is_important: bool = False,
+        a_share_impact_adjustment: float = 0.0,
     ) -> float:
-        """计算综合评分"""
+        """计算综合评分
+
+        Args:
+            a_share_impact_adjustment: A股影响力调整分 (-40~+10)
+        """
         importance = float(importance_score)
+
+        # 同花顺红字重要消息 boost
+        if is_important:
+            importance = min(100, importance + 15)
 
         incremental_factor = (
             cls.INCREMENTAL_FACTOR if is_incremental else cls.NON_INCREMENTAL_FACTOR
@@ -50,6 +60,19 @@ class ScoreCalculator:
             + expectation_factor * settings.WEIGHT_EXPECTATION / 0.2
             + sensitivity * settings.WEIGHT_SENSITIVITY / 0.1
         )
+
+        # 同花顺红字重要消息分段加分 boost
+        if is_important:
+            if final_score >= 70:
+                boost = 5
+            elif final_score >= 40:
+                boost = 10
+            else:
+                boost = 12
+            final_score = min(100, final_score + boost)
+
+        # 加上A股影响调整分
+        final_score = final_score + a_share_impact_adjustment
 
         return round(min(100, max(0, final_score)), 2)
 
@@ -67,14 +90,21 @@ class ScoreCalculator:
 
     @classmethod
     def calculate_from_analysis(
-        cls, analysis: NewsAnalysisResult
+        cls, analysis: NewsAnalysisResult, is_important: bool = False,
+        a_share_impact_adjustment: float = 0.0
     ) -> tuple[float, str]:
-        """从分析结果计算综合评分和类型"""
+        """从分析结果计算综合评分和类型
+
+        Args:
+            a_share_impact_adjustment: A股影响力调整分 (-40~+10)
+        """
         final_score = cls.calculate_final_score(
             importance_score=analysis.importance_score,
             is_incremental=analysis.is_incremental,
             expectation_diff=analysis.expectation_diff.value,
             category=analysis.category,
+            is_important=is_important,
+            a_share_impact_adjustment=a_share_impact_adjustment,
         )
 
         news_type = cls.determine_news_type(final_score)
@@ -82,18 +112,21 @@ class ScoreCalculator:
         return final_score, news_type
 
     @classmethod
-    def recalculate_score(cls, news_data: dict) -> tuple[float, str]:
+    def recalculate_score(cls, news_data: dict, a_share_impact_adjustment: float = 0.0) -> tuple[float, str]:
         """根据已有数据重新计算评分"""
         importance_score = news_data.get("importance_score", 50)
         is_incremental = news_data.get("is_incremental", False)
         expectation_diff = news_data.get("expectation_diff", "无法判断")
         category = news_data.get("category", "其他")
+        is_important = news_data.get("is_important", False)
 
         final_score = cls.calculate_final_score(
             importance_score=importance_score,
             is_incremental=is_incremental,
             expectation_diff=expectation_diff,
             category=category,
+            is_important=is_important,
+            a_share_impact_adjustment=a_share_impact_adjustment,
         )
 
         news_type = cls.determine_news_type(final_score)

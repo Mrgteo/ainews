@@ -105,6 +105,9 @@ class TonghuashunScraper:
 
                     pub_time = self._parse_time(pub_time_str)
 
+                    # import: 0=普通 3=红字重要消息; color: 1=普通 2=红色
+                    is_important = item.get("import", 0) == 3 or item.get("color") == 2
+
                     if title and url:
                         news_list.append({
                             "title": title,
@@ -113,6 +116,7 @@ class TonghuashunScraper:
                             "source": source,
                             "summary": summary if summary else None,
                             "content": None,
+                            "is_important": is_important,
                         })
                 except Exception as e:
                     logger.warning(f"解析新闻项失败: {e}")
@@ -202,10 +206,10 @@ class TonghuashunScraper:
         filtered_news = [n for n in all_news if self._is_within_days(n.get("pub_time"), days)]
         logger.info(f"获取到 {len(all_news)} 条新闻，过滤后剩余 {len(filtered_news)} 条")
 
-        for i, news in enumerate(filtered_news[:10]):
+        for i, news in enumerate(filtered_news):
             url = news.get("url")
             if url:
-                logger.info(f"正在抓取第 {i+1}/{min(len(filtered_news), 10)} 条新闻正文...")
+                logger.info(f"正在抓取第 {i+1}/{len(filtered_news)} 条新闻正文...")
                 content = self.fetch_content_with_requests(url)
                 if content:
                     news["content"] = content

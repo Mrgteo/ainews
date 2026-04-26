@@ -1,0 +1,82 @@
+# 案例库 Prompt (Few-shot Examples)
+# 用于提升模型判断稳定性的示例
+
+## 用法
+
+在分析时，从案例库中选取3-5个相似案例，作为few-shot示例输入给模型。
+
+## 案例格式
+
+### 正例 (Positive Cases)
+
+```json
+{
+  "case_type": "positive",
+  "news_title": "宁德时代发布超预期业绩公告",
+  "news_content": "宁德时代2023年Q4净利润超市场预期20%...",
+  "analysis": {
+    "importance_score": 88,
+    "incremental_level": "high",
+    "new_facts": ["Q4净利润超预期20%", "市场份额提升至50%"],
+    "expectation_type": "exceed",
+    "sentiment": "bullish"
+  },
+  "label_reason": "典型的高重要性+超预期+增量信息案例"
+}
+```
+
+### 反例 (Negative Cases) - 避免误判
+
+```json
+{
+  "case_type": "negative",
+  "error_type": "overestimated",
+  "news_title": "某自媒体称某政策将出台",
+  "news_content": "据知情人士透露，某政策可能将于近期出台...",
+  "original_analysis": {
+    "importance_score": 75,
+    "need_manual_review": false
+  },
+  "correct_analysis": {
+    "importance_score": 30,
+    "need_manual_review": true
+  },
+  "error_reason": "来源为自媒体未经证实消息，不应高估",
+  "avoid_rules": [
+    "自媒体消息默认低可信度",
+    "'可能'、'据知情人士'等措辞表示不确定性高",
+    "未经官方确认的政策消息不应高权重"
+  ]
+}
+```
+
+## 案例选取原则
+
+1. **相似性优先**：选择与当前新闻最相似的案例
+2. **多样性**：正例和反例搭配
+3. **时效性**：优先选择近期案例
+4. **标注清晰**：确保案例的分析和标注准确
+
+## 使用示例
+
+在调用分析模型时，将案例作为few-shot示例：
+
+```
+你将看到3个参考案例：
+
+案例1 (正例)：
+标题：xxx
+分析：xxx
+
+案例2 (反例)：
+标题：xxx
+分析：xxx - 错误原因：xxx
+
+案例3 (正例)：
+标题：xxx
+分析：xxx
+
+现在分析以下新闻：
+标题：{current_title}
+内容：{current_content}
+```

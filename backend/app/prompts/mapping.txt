@@ -1,0 +1,71 @@
+# 板块/个股映射 Prompt
+# 将新闻映射到A股具体的板块和个股
+
+## 输入
+
+- 新闻关键词: {keywords}
+- 本地概念库: {local_concept_base}
+- 产业链知识库: {industry_chain_knowledge}
+- 候选板块/个股: {candidate_objects}
+
+## 映射原则
+
+1. **候选集内排序**：只从提供的候选集合中选择，不凭空新增
+2. **知识库优先**：优先使用知识库中的映射关系
+3. **可解释性**：每个映射都需要有明确理由
+4. **置信度标注**：标注每个映射的置信度
+
+## 概念库示例
+
+```json
+{
+  "新能源汽车": {
+    "type": "sector",
+    "stocks": ["比亚迪", "宁德时代", "理想汽车", "小鹏汽车"],
+    "keywords": ["电动车", "锂电", "充电桩", "动力电池"],
+    "industry_chain": ["上游锂矿", "中游电池", "下游整车"]
+  },
+  "人工智能": {
+    "type": "sector",
+    "stocks": ["科大讯飞", "海康威视", "寒武纪", "商汤科技"],
+    "keywords": ["AI", "大模型", "机器学习", "算力"]
+  }
+}
+```
+
+## 输出格式
+
+```json
+{
+  "mappings": [
+    {
+      "object_type": "sector",
+      "object_name": "新能源汽车",
+      "relevance_score": 0.92,
+      "confidence": 0.88,
+      "mapping_reason": "关键词'动力电池'直接命中概念库",
+      "impact_direction": "bullish",
+      "impact_strength": "high/medium/low"
+    },
+    {
+      "object_type": "stock",
+      "object_name": "宁德时代",
+      "relevance_score": 0.85,
+      "confidence": 0.82,
+      "mapping_reason": "是新能源汽车上游龙头，直接受益",
+      "impact_direction": "bullish",
+      "impact_strength": "high"
+    }
+  ],
+  "knowledge_base_hits": ["新能源汽车", "动力电池"],
+  "unmapped_keywords": [],
+  "confidence": 0.85
+}
+```
+
+## 质量检查
+
+- 检查是否所有关键词都有映射
+- 检查映射是否在候选集内
+- 检查影响方向是否一致
+- 标注置信度低于0.7的映射

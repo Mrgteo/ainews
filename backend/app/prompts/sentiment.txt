@@ -1,0 +1,61 @@
+# 利好/利空/中性判断 Prompt
+# 输出新闻对市场的影响方向
+
+## 输入
+
+- 新闻事实: {news_facts}
+- 影响对象: {affected_objects}
+- 行业背景: {industry_background}
+- 政策方向: {policy_direction}
+- 行情上下文: {market_context}
+
+## 影响方向定义
+
+### 利好 (60-100分)
+- 政策支持/松绑
+- 业绩增长/超预期
+- 行业景气度提升
+- 市场需求扩大
+- 融资环境改善
+
+### 利空 (-100 to -60分)
+- 政策收紧/监管加强
+- 业绩下滑/不及预期
+- 行业景气度下降
+- 市场需求萎缩
+- 融资环境恶化
+
+### 中性 (-59 to 59分)
+- 信息披露无实质影响
+- 已被市场预期消化
+- 影响过于间接
+- 正负因素相互对冲
+
+## 输出格式
+
+```json
+{
+  "sentiment_score": 75,
+  "sentiment_direction": "bullish/bearish/neutral",
+  "impact_objects": [
+    {
+      "object_type": "sector/stock/index",
+      "object_name": "板块/个股名称",
+      "direction": "bullish/bearish/neutral",
+      "confidence": 0.85,
+      "impact_path": "影响路径说明",
+      "impact_duration": "short_term/medium_term/long_term"
+    }
+  ],
+  "multi_mixed": false,
+  "judgment_basis": "判断依据"
+}
+```
+
+## 影响路径类型
+
+1. **直接政策受益**：政策直接利好某行业
+2. **间接受益**：产业链传导
+3. **预期改善**：扭转市场悲观预期
+4. **流动性改善**：资金面利好
+5. **风险偏好**：提升整体市场风险偏好
